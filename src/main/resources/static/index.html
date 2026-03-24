@@ -2,64 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp Bot Demo</title>
     <style>
-        body { font-family: sans-serif; background-color: #ece5dd; display: flex; justify-content: center; padding-top: 50px; }
-        .chat-container { width: 350px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); overflow: hidden; }
-        .header { background: #075e54; color: white; padding: 15px; text-align: center; font-weight: bold; }
-        .chat-box { height: 400px; padding: 15px; background: #e5ddd5; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 10px; max-width: 75%; word-wrap: break-word; }
-        .user { background: #dcf8c6; align-self: flex-end; }
-        .bot { background: white; align-self: flex-start; }
-        .input-box { display: flex; padding: 10px; background: #f0f0f0; }
-        input { flex: 1; padding: 10px; border: none; border-radius: 20px; outline: none; }
-        button { background: #075e54; color: white; border: none; padding: 10px 15px; margin-left: 10px; border-radius: 20px; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #d1d7db; display: flex; justify-content: center; align-items: center; height: 100vh; }
+
+        /* Main Phone/Chat Container */
+        .chat-container { width: 400px; height: 650px; background-color: #efeae2; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; overflow: hidden; position: relative; }
+
+        /* Header */
+        .header { background-color: #f0f2f5; padding: 12px 16px; display: flex; align-items: center; border-bottom: 1px solid #d1d7db; z-index: 10; }
+        .avatar { width: 40px; height: 40px; background-color: #dfe5e7; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; margin-right: 15px; }
+        .header-info { display: flex; flex-direction: column; }
+        .header-name { font-size: 16px; font-weight: 500; color: #111b21; }
+        .header-status { font-size: 13px; color: #667781; margin-top: 2px; }
+
+        /* Chat Area */
+        .chat-box { flex: 1; padding: 20px 5%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; /* Subtle background pattern simulation */ background-image: radial-gradient(#d1d7db 1px, transparent 1px); background-size: 20px 20px; }
+
+        /* Messages */
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+        .msg-wrapper.user { align-self: flex-end; }
+        .msg-wrapper.bot { align-self: flex-start; }
+
+        .msg { padding: 6px 12px 8px 12px; border-radius: 8px; font-size: 14.5px; line-height: 19px; position: relative; color: #111b21; word-wrap: break-word; box-shadow: 0 1px 0.5px rgba(11,20,26,.13); }
+        .msg.user { background-color: #d9fdd3; border-top-right-radius: 0; }
+        .msg.bot { background-color: #ffffff; border-top-left-radius: 0; }
+
+        /* Timestamps */
+        .time { font-size: 11px; color: #667781; margin-top: 4px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+        .msg.user .time { color: #54656f; }
+
+        /* Input Area */
+        .footer { background-color: #f0f2f5; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+        .input-wrapper { flex: 1; background-color: #ffffff; border-radius: 8px; padding: 9px 12px; display: flex; align-items: center; box-shadow: 0 1px 0.5px rgba(11,20,26,.13); }
+        input { flex: 1; border: none; outline: none; font-size: 15px; color: #111b21; background: transparent; }
+        input::placeholder { color: #8696a0; }
+        button { background-color: transparent; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; padding: 8px; border-radius: 50%; transition: background-color 0.2s; }
+        button:hover { background-color: #e9edef; }
+
+        /* Send Icon SVG */
+        .send-icon { fill: #8696a0; width: 24px; height: 24px; }
+        button:active .send-icon { fill: #00a884; }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <div class="header">WhatsApp ChatBot</div>
-    <div class="chat-box" id="chat-box">
-        <div class="msg bot">Send me a message! Try "Hi" or "Bye".</div>
+    <div class="header">
+        <div class="avatar">Jarurat </div>
+        <div class="header-info">
+            <div class="header-name"></div>
+            <div class="header-status">online</div>
+        </div>
     </div>
-    <div class="input-box">
-        <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage()">
-        <button onclick="sendMessage()">Send</button>
+
+    <div class="chat-box" id="chat-box">
+        <div class="msg-wrapper bot">
+            <div class="msg bot">
+                Hello! I'm the backend simulation bot for the Java Internship assignment. Try sending me "Hi" or "Bye"!
+                <div class="time" id="init-time"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="input-wrapper">
+            <input type="text" id="messageInput" placeholder="Type a message" onkeypress="if(event.key === 'Enter') sendMessage()">
+        </div>
+        <button onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" class="send-icon">
+                <path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"></path>
+            </svg>
+        </button>
     </div>
 </div>
 
 <script>
+    // Set initial message time
+    document.getElementById('init-time').innerText = getCurrentTime();
+
     async function sendMessage() {
         const input = document.getElementById('messageInput');
         const text = input.value.trim();
         if (!text) return;
 
-        // Show user message
+        // 1. Show user message instantly
         addMessage(text, 'user');
         input.value = '';
 
         try {
-            // Send to your Spring Boot Backend
+            // 2. Send request to your Java Spring Boot backend
             const response = await fetch('/webhook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: text })
             });
-            const data = await response.json();
-            addMessage(data.reply, 'bot');
+
+            if (response.ok) {
+                const data = await response.json();
+                // 3. Show the bot's reply from the backend
+                setTimeout(() => addMessage(data.reply, 'bot'), 400); // Tiny delay makes it feel real
+            } else {
+                addMessage("Error: Backend returned a bad status.", 'bot');
+            }
         } catch (error) {
-            addMessage("Backend is not running!", 'bot');
+            addMessage("⚠️ Error: Is your Spring Boot backend running?", 'bot');
         }
     }
 
     function addMessage(text, sender) {
         const chatBox = document.getElementById('chat-box');
+
+        // Create wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = `msg-wrapper ${sender}`;
+
+        // Create message bubble
         const msgDiv = document.createElement('div');
         msgDiv.className = `msg ${sender}`;
         msgDiv.innerText = text;
-        chatBox.appendChild(msgDiv);
+
+        // Create timestamp
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'time';
+
+        // Add fake "read receipt" blue ticks for user messages
+        if (sender === 'user') {
+            timeDiv.innerHTML = `${getCurrentTime()} <svg viewBox="0 0 16 15" width="16" height="15"><path fill="#53bdeb" d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"></path></svg>`;
+        } else {
+            timeDiv.innerText = getCurrentTime();
+        }
+
+        msgDiv.appendChild(timeDiv);
+        wrapper.appendChild(msgDiv);
+        chatBox.appendChild(wrapper);
+
+        // Scroll to the bottom automatically
         chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Helper function to get current time (e.g., 10:42 AM)
+    function getCurrentTime() {
+        return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 </script>
 </body>
